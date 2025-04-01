@@ -315,6 +315,8 @@ public class TwoWayLinkedList <E> implements IList<E> {
        fixPrevPointers();
     }
 
+
+
     private void fixPrevPointers() {
         Node<E> current = head;
         int index = 0;
