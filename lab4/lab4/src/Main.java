@@ -24,5 +24,11 @@ public class Main {
         System.out.println("usuwam element na indeksie 3 ");
         System.out.println(list.remove(3));
         list.printList();
+
+        list.getPrev(9);
+
+       // System.out.println("pusta lista ");
+        //list.clear();
+        //list.get(2);
     }
 }
