@@ -55,8 +55,13 @@ public class Main {
 					String inputType = generatorNames[g];
 
 					for (int size : sizes) {
-						Result result = Tester.runNTimes(algorithm, gen, size, 20);
-						writeToCSV(result, algorithmName, inputType, size, out);
+						try {
+							System.out.printf("Running: %s / %s / size = %d\n", algorithmName, inputType, size);
+							Result result = Tester.runNTimes(algorithm, gen, size, 20);
+							writeToCSV(result, algorithmName, inputType, size, out);
+						} catch (Exception e) {
+							System.err.printf("Błąd przy %s / %s / size=%d: %s\n", algorithmName, inputType, size, e.getMessage());
+						}
 					}
 				}
 			}

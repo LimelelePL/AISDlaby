@@ -4,7 +4,8 @@ import java.util.Comparator;
 import java.util.List;
 
 public class InsertionSort<T> extends AbstractSwappingSortingAlgorithm<T> {
-    public InsertionSort(Comparator comparator) {
+
+    public InsertionSort(Comparator<? super T> comparator) {
         super(comparator);
     }
 
@@ -12,22 +13,28 @@ public class InsertionSort<T> extends AbstractSwappingSortingAlgorithm<T> {
     public List<T> sort(List<T> list) {
         int size = list.size();
 
-        for (int i = 1; i < size; i++) {
+        for (int i = size - 2; i >= 0; i--) {
             T element = list.get(i);
-            int insertIndex = binarySearch(list, element, 0, i - 1);
-            for (int j = i; j > insertIndex; j--) {
-                swap(list, j, j - 1);
+            int pos = binarySearch(list, element, i + 1, size - 1);
+
+            if (pos > size - 1) pos = size - 1;
+
+            int j = i;
+            while (j < pos) {
+                swap(list, j, j + 1);
+                j++;
             }
         }
+
         return list;
     }
 
-    public int binarySearch(List<T> list, T element, int left, int right) {
+    private int binarySearch(List<T> list, T element, int left, int right) {
         while (left <= right) {
             int mid = (left + right) / 2;
-            int compare = compare(element, list.get(mid));
+            int cmp = compare(element, list.get(mid));
 
-            if (compare < 0) {
+            if (cmp < 0) {
                 right = mid - 1;
             } else {
                 left = mid + 1;
@@ -36,4 +43,5 @@ public class InsertionSort<T> extends AbstractSwappingSortingAlgorithm<T> {
         return left;
     }
 }
+
 
