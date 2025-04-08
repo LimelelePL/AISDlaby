@@ -12,20 +12,18 @@ public class InsertionSort<T> extends AbstractSwappingSortingAlgorithm<T> {
     @Override
     public List<T> sort(List<T> list) {
         int size = list.size();
-
         for (int i = size - 2; i >= 0; i--) {
             T element = list.get(i);
             int pos = binarySearch(list, element, i + 1, size - 1);
 
-            if (pos > size - 1) pos = size - 1;
-
-            int j = i;
-            while (j < pos) {
-                swap(list, j, j + 1);
-                j++;
+            if (pos > i ) {
+                int j = i;
+                while (j < pos-1) {
+                    swap(list, j, j + 1);
+                    j++;
+                }
             }
         }
-
         return list;
     }
 
@@ -34,7 +32,7 @@ public class InsertionSort<T> extends AbstractSwappingSortingAlgorithm<T> {
             int mid = (left + right) / 2;
             int cmp = compare(element, list.get(mid));
 
-            if (cmp < 0) {
+            if (cmp <= 0) {
                 right = mid - 1;
             } else {
                 left = mid + 1;
