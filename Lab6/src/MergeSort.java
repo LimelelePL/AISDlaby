@@ -12,80 +12,64 @@ public class MergeSort<T> extends AbstractSortingAlgorithm<T> {
 
     @Override
     public List<T> sort(List<T> list) {
-        if (list == null || list.size() <= 1) {
-            return list;
-        }
-        mergeSort(list);
-        return list;
+        if (list == null || list.size() <= 1) return list;
+        return mergeSort(list);
     }
 
-    private void mergeSort(List<T> list) {
+    private List<T> mergeSort(List<T> list) {
         int n = list.size();
         if (n < 2) {
-            return;
+            return new ArrayList<>(list);
         }
+
         if (n < 3) {
-           //dla małych fragmentów musimy zastosowac merge sort dla dwóch
             int mid = n / 2;
-            List<T> left = new ArrayList<>(list.subList(0, mid));
-            List<T> right = new ArrayList<>(list.subList(mid, n));
-            mergeSort(left);
-            mergeSort(right);
-            list.clear();
-            mergeTwoLists(list, left, right);
-            return;
+            List<T> left = mergeSort(list.subList(0, mid));
+            List<T> right = mergeSort(list.subList(mid, n));
+            return mergeTwoLists(left, right);
         }
 
         int firstSize = n / 3;
         int secondSize = n / 3;
         int thirdSize = n - firstSize - secondSize;
 
-        List<T> first = new ArrayList<>(list.subList(0, firstSize));
-        List<T> second = new ArrayList<>(list.subList(firstSize, firstSize + secondSize));
-        List<T> third = new ArrayList<>(list.subList(firstSize + secondSize, n));
+        List<T> first = mergeSort(list.subList(0, firstSize));
+        List<T> second = mergeSort(list.subList(firstSize, firstSize + secondSize));
+        List<T> third = mergeSort(list.subList(firstSize + secondSize, n));
 
-        mergeSort(first);
-        mergeSort(second);
-        mergeSort(third);
-        list.clear();
-        mergeThreeLists(list, first, second, third);
+        return mergeThreeLists(first, second, third);
     }
 
-    private void mergeTwoLists(List<T> output, List<T> list1, List<T> list2) {
-        mergeTwoLists(output, list1, 0, list2, 0);
-    }
+    private List<T> mergeTwoLists(List<T> list1, List<T> list2) {
+        List<T> output = new ArrayList<>(list1.size() + list2.size());
+        int i = 0, j = 0;
 
-    private void mergeTwoLists(List<T> output, List<T> list1, int start1, List<T> list2, int start2) {
-        int i = start1, j = start2;
-        int size1 = list1.size();
-        int size2 = list2.size();
-
-        while (i < size1 && j < size2) {
+        while (i < list1.size() && j < list2.size()) {
             if (compare(list1.get(i), list2.get(j)) <= 0) {
-                output.add(list1.get(i));
-                i++;
+                output.add(list1.get(i++));
             } else {
-                output.add(list2.get(j));
-                j++;
+                output.add(list2.get(j++));
             }
         }
-        while (i < size1) {
-            output.add(list1.get(i));
-            i++;
+
+        while (i < list1.size()) {
+            output.add(list1.get(i++));
         }
-        while (j < size2) {
-            output.add(list2.get(j));
-            j++;
+        while (j < list2.size()) {
+            output.add(list2.get(j++));
         }
+
+        return output;
     }
 
-    private void mergeThreeLists(List<T> output, List<T> list1, List<T> list2, List<T> list3) {
+    private List<T> mergeThreeLists(List<T> list1, List<T> list2, List<T> list3) {
         int i = 0, j = 0, k = 0;
         int size1 = list1.size();
         int size2 = list2.size();
         int size3 = list3.size();
 
-        // jezeli wszystkie 3 listy maja elementy
+        List<T> output = new ArrayList<>(size1 + size2 + size3);
+
         while (i < size1 && j < size2 && k < size3) {
             T val1 = list1.get(i);
             T val2 = list2.get(j);
@@ -103,14 +87,16 @@ public class MergeSort<T> extends AbstractSortingAlgorithm<T> {
             }
         }
 
-        // gdy jedna jest wyczerpana to merge dla dwóch list
+        // Resztę dorzucamy za pomocą mergeTwoLists
         if (i == size1) {
-            mergeTwoLists(output, list2, j, list3, k);
+            output.addAll(mergeTwoLists(list2.subList(j, size2), list3.subList(k, size3)));
         } else if (j == size2) {
-            mergeTwoLists(output, list1, i, list3, k);
+            output.addAll(mergeTwoLists(list1.subList(i, size1), list3.subList(k, size3)));
         } else if (k == size3) {
-            mergeTwoLists(output, list1, i, list2, j);
+            output.addAll(mergeTwoLists(list1.subList(i, size1), list2.subList(j, size2)));
         }
+
+        return output;
     }
 }
 

@@ -2,6 +2,7 @@
 import core.AbstractSwappingSortingAlgorithm;
 import pivot.PivotStrategy;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -18,7 +19,15 @@ public class QuickSort <T> extends AbstractSwappingSortingAlgorithm<T>  {
         if (list.isEmpty() || list.size() < 2) {
             return list;
         }
-        quickSort(list, 0, list.size() - 1);
+
+        ArrayList<T> temp = new ArrayList<>(list);
+        temp.addAll(list);
+
+        quickSort(temp, 0, list.size() - 1);
+
+        list.clear();
+        list.addAll(temp);
+
         return list;
     }
 
