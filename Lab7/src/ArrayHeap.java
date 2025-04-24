@@ -48,7 +48,6 @@ public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T> 
         heap.set(0, heap.removeLast());
 
         int index=0;
-
         while (hasLeftChild(index)) {
 
             int largest = index;
