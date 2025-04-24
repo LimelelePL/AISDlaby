@@ -2,34 +2,36 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.NoSuchElementException;
 
-public class TreeArrayBinaryHeap <T extends Comparable<T>>{
+public class TreeArrayBinaryHeap<T extends Comparable<T>> {
     private int maxHeight;
     private TreeNode root;
     private int size;
 
-    public TreeArrayBinaryHeap(int maxHeight){
+    public TreeArrayBinaryHeap(int maxHeight) {
         this.maxHeight = maxHeight;
         size = 0;
     }
-    public TreeArrayBinaryHeap(){}
 
-    public class TreeNode{
+    public TreeArrayBinaryHeap() {
+    }
+
+    public class TreeNode {
         private TreeNode left;
         private TreeNode right;
         private T value;
-        private ArrayHeap <T> subHeapLeft,subHeapRight;
+        private ArrayHeap<T> subHeapLeft, subHeapRight;
 
         public TreeNode(T value) {
             this.value = value;
         }
     }
 
-    public void clear(){
+    public void clearTree() {
         root = null;
         size = 0;
     }
 
-    public T max() {
+    public T maxFromTree() {
         if (size == 0)
             throw new NoSuchElementException();
 
@@ -41,27 +43,23 @@ public class TreeArrayBinaryHeap <T extends Comparable<T>>{
         // odłączamy ten ostatni węzeł od drzewa
         if (lastIndex != 0) {
             int parentIdx = getParentIndex(lastIndex);
-            TreeNode parent    = getNode(parentIdx);
+            TreeNode parent = getNode(parentIdx);
             if (getLeftChildIndex(parentIdx) == lastIndex) {
-                parent.left  = null;
+                parent.left = null;
             } else {
                 parent.right = null;
             }
         }
         size--;
 
-  //heapify down
+        //heapify down
         TreeNode current = root;
-        while (true) {
-            TreeNode left  = current.left;
+        while (current.left != null && current.right != null) {
+            TreeNode left = current.left;
             TreeNode right = current.right;
 
-            // jak nie ma dzieci wtedt koniec petli
-            if (left == null && right == null)
-                break;
-
             TreeNode biggerChild;
-            if (right == null || (left != null && left.value.compareTo(right.value) >= 0)) {
+            if (left.value.compareTo(right.value) >= 0) {
                 biggerChild = left;
             } else {
                 biggerChild = right;
@@ -78,7 +76,7 @@ public class TreeArrayBinaryHeap <T extends Comparable<T>>{
         return result;
     }
 
-    public void add(T value) {
+    public void addToTree(T value) {
         TreeNode newNode = new TreeNode(value);
         int index = size++;
 
@@ -103,7 +101,7 @@ public class TreeArrayBinaryHeap <T extends Comparable<T>>{
             nodesOnPath.add(current);
         }
 
-     //dodajemy nowy wezel
+        //dodajemy nowy wezel
         TreeNode lastParent = nodesOnPath.getLast();
         if (pathBits.getLast() == 0) {
             lastParent.left = newNode;
@@ -112,12 +110,12 @@ public class TreeArrayBinaryHeap <T extends Comparable<T>>{
         }
         nodesOnPath.add(newNode);
 
-  //idziemy wezlami do gory
+        //idziemy wezlami do gory
         for (int i = nodesOnPath.size() - 1; i > 0; i--) {
             TreeNode child = nodesOnPath.get(i);
             TreeNode parent = nodesOnPath.get(i - 1);
             if (parent.value.compareTo(child.value) < 0) {
-                swapValues(parent,child);
+                swapValues(parent, child);
             } else {
                 break;
             }
@@ -125,15 +123,15 @@ public class TreeArrayBinaryHeap <T extends Comparable<T>>{
     }
 
     //metody pomocnocze
-    private int calculateHeight(int size){
-        return  (int) (Math.log(size + 1) / Math.log(2));
+    private int calculateHeight(int size) {
+        return (int) (Math.log(size + 1) / Math.log(2));
     }
 
 
     private void swapValues(TreeNode a, TreeNode b) {
-        T tmp    = a.value;
-        a.value  = b.value;
-        b.value  = tmp;
+        T tmp = a.value;
+        a.value = b.value;
+        b.value = tmp;
     }
 
     private TreeNode getNode(int index) {
@@ -156,7 +154,7 @@ public class TreeArrayBinaryHeap <T extends Comparable<T>>{
         return node;
     }
 
-    private ArrayList<Integer> calculateTrack(int index){
+    private ArrayList<Integer> calculateTrack(int index) {
         ArrayList<Integer> binaryRepresentation = new ArrayList<>();
         int k = index + 1;
         while (k > 1) {
@@ -165,36 +163,42 @@ public class TreeArrayBinaryHeap <T extends Comparable<T>>{
         }
         return binaryRepresentation;
     }
+
     private int getMaxHeight() {
         return maxHeight;
     }
+
     public int getParentIndex(int index) {
         return (index - 1) / 2;
     }
+
     public int getLeftChildIndex(int index) {
         return (index * 2) + 1;
     }
+
     public int getRightChildIndex(int index) {
         return (index * 2) + 2;
     }
 
-        //debug
-        public void getLeft(int i){
-            for (int x=0; x<i; x++){
-                System.out.println(root.left.value);
-            }
+    //debug
+    public void getLeft(int i) {
+        for (int x = 0; x < i; x++) {
+            System.out.println(root.left.value);
         }
-         public void getRight(int i){
-        System.out.println(root.right.value);
-        }
-        public void getRoot(){
-        System.out.println(root.value);
-        }
-        public T getAtIdx(int i){
-            System.out.println(getNode(i).value);
-        return getNode(i).value;
-        }
+    }
 
+    public void getRight(int i) {
+        System.out.println(root.right.value);
+    }
+
+    public void getRoot() {
+        System.out.println(root.value);
+    }
+
+    public T getAtIdx(int i) {
+        System.out.println(getNode(i).value);
+        return getNode(i).value;
+    }
 
 
     public static void main(String[] args) {
@@ -205,21 +209,21 @@ public class TreeArrayBinaryHeap <T extends Comparable<T>>{
 //            System.out.println(binaryRepresentation.get(i));
 //        }
 
-        treeArrayBinaryHeap.add(1);
-        treeArrayBinaryHeap.add(2);
-        treeArrayBinaryHeap.add(3);
-        treeArrayBinaryHeap.add(4);
-        treeArrayBinaryHeap.add(43);
-        treeArrayBinaryHeap.add(5);
+        treeArrayBinaryHeap.addToTree(1);
+        treeArrayBinaryHeap.addToTree(2);
+        treeArrayBinaryHeap.addToTree(3);
+        treeArrayBinaryHeap.addToTree(4);
+        treeArrayBinaryHeap.addToTree(43);
+        treeArrayBinaryHeap.addToTree(5);
 
         treeArrayBinaryHeap.getAtIdx(0);
-       treeArrayBinaryHeap.getAtIdx(1);
-       treeArrayBinaryHeap.getAtIdx(2);
-       treeArrayBinaryHeap.getAtIdx(3);
-       treeArrayBinaryHeap.getAtIdx(4);
+        treeArrayBinaryHeap.getAtIdx(1);
+        treeArrayBinaryHeap.getAtIdx(2);
+        treeArrayBinaryHeap.getAtIdx(3);
+        treeArrayBinaryHeap.getAtIdx(4);
         treeArrayBinaryHeap.getAtIdx(5);
 
-        treeArrayBinaryHeap.max();
+        treeArrayBinaryHeap.maxFromTree();
         System.out.println();
 
 

@@ -16,7 +16,7 @@ public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T> 
         return 2 * index + 1 < heap.size();
     }
 
-    public void add(T value) {
+    public void addToArrayHeap(T value) {
         heap.add(value);
         int index = heap.size() - 1;
 
@@ -35,7 +35,7 @@ public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T> 
         }
     }
 
-    public T maximum() {
+    public T maxFromArrayHeap() {
         if (heap.isEmpty()) {
             throw new NoSuchElementException("Heap is empty");
         }
@@ -76,7 +76,7 @@ public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T> 
         return max;
     }
 
-    public void clear() {
+    public void clearArrayHeap() {
         heap.clear();
     }
     public boolean isEmpty() {
@@ -89,18 +89,18 @@ public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T> 
 
     public static void main(String[] args) {
         ArrayHeap<Integer> heap = new ArrayHeap<>();
-        heap.add(1);
-        heap.add(2);
-        heap.add(3);
-        heap.add(4);
-        heap.add(5);
-        heap.add(6);
-        heap.add(7);
+        heap.addToArrayHeap(1);
+        heap.addToArrayHeap(2);
+        heap.addToArrayHeap(3);
+        heap.addToArrayHeap(4);
+        heap.addToArrayHeap(5);
+        heap.addToArrayHeap(6);
+        heap.addToArrayHeap(7);
 
-        System.out.println(heap.maximum());
-        System.out.println(heap.maximum());
-        System.out.println(heap.maximum());
-        System.out.println(heap.maximum());
+        System.out.println(heap.maxFromArrayHeap());
+        System.out.println(heap.maxFromArrayHeap());
+        System.out.println(heap.maxFromArrayHeap());
+        System.out.println(heap.maxFromArrayHeap());
 
 
     }
