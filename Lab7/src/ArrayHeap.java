@@ -128,21 +128,4 @@ public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T> 
         isPossibleToAdd = possibleToAdd;
     }
 
-    public static void main(String[] args) {
-        ArrayHeap<Integer> heap = new ArrayHeap<>();
-        heap.addToArrayHeap(1);
-        heap.addToArrayHeap(2);
-        heap.addToArrayHeap(3);
-        heap.addToArrayHeap(4);
-        heap.addToArrayHeap(5);
-        heap.addToArrayHeap(6);
-        heap.addToArrayHeap(7);
-
-        System.out.println(heap.maxFromArrayHeap());
-        System.out.println(heap.maxFromArrayHeap());
-        System.out.println(heap.maxFromArrayHeap());
-        System.out.println(heap.maxFromArrayHeap());
-
-
-    }
 }
