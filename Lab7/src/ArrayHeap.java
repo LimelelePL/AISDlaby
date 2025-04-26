@@ -19,13 +19,6 @@ public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T> 
         return heap.toString();
     }
 
-    private boolean hasRightChild(int index) {
-        return 2 * index + 2 < heap.size();
-    }
-
-    private boolean hasLeftChild(int index) {
-        return 2 * index + 1 < heap.size();
-    }
     @Override
     public void add(T item) {
         addToArrayHeap(item);
@@ -46,7 +39,15 @@ public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T> 
         return heap.get(0);
     }
 
-    public void addToArrayHeap(T value) {
+    private boolean hasRightChild(int index) {
+        return 2 * index + 2 < heap.size();
+    }
+
+    private boolean hasLeftChild(int index) {
+        return 2 * index + 1 < heap.size();
+    }
+
+    private void addToArrayHeap(T value) {
         heap.add(value);
         int index = heap.size() - 1;
 
@@ -65,7 +66,7 @@ public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T> 
         }
     }
 
-    public T maxFromArrayHeap() {
+    private T maxFromArrayHeap() {
         if (heap.isEmpty()) {
             throw new NoSuchElementException("Heap is empty");
         }
@@ -106,7 +107,7 @@ public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T> 
         return max;
     }
 
-    public void clearArrayHeap() {
+    private void clearArrayHeap() {
         heap.clear();
     }
     public boolean isEmpty() {
@@ -118,14 +119,6 @@ public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T> 
     }
     public int getHeight(){
         return (int) (Math.log(heap.size() + 1) / Math.log(2));
-    }
-
-    public boolean isPossibleToAdd() {
-        return isPossibleToAdd;
-    }
-
-    public void setPossibleToAdd(boolean possibleToAdd) {
-        isPossibleToAdd = possibleToAdd;
     }
 
 }

@@ -41,7 +41,7 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
         if (size == 0) throw new NoSuchElementException();
         T result = root.value;
 
-        // zastąpujemy korzeń ostatnim elementem (z drzewa lub podkopca)
+        // zastąpujemy root ostatnim elementem (z drzewa lub podkopca)
         T lastVal = replaceRootWithLast();
         root.value = lastVal;
         size--;
@@ -60,15 +60,16 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
     }
 
     //METODY POMOCNICZE
+
     private void reorderAfterAdd(int leafIndex, boolean leftSide) {
         TreeNode node = getNode(leafIndex);
         ArrayHeap<T> heap = leftSide ? node.subHeapLeft : node.subHeapRight;
 
+        // jezeli max z podkopca jest mniejszy od rodzica z drzewa to robimy reorder
         T subMax = heap.peek();
         if (subMax.compareTo(node.value) <= 0) {
             return;
         }
-
         heap.maximum();
 
         //zamieniamy najwiekszy element z heapa z mniejszym z drzewa
@@ -99,12 +100,16 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
         int lastIdx = (int) Math.pow(2, h+1) - 2; // indeks ostatniego węzła na poziomie H
         int actualEnd = Math.min(lastIdx, size - 1);
 
-        //zbieram do listy wezly które są na poziomie maxHeight i inicjalizuje dla nich podkopce
+        //zbieram do listy wezly które są na poziomie maxHeight i robie dla nich podkopce
         ArrayList<TreeNode> maxHeightNodes = new ArrayList<>();
         for (int i = firstIdx; i <= actualEnd; i++) {
             TreeNode node = getNode(i);
-            if (node.subHeapLeft  == null) node.subHeapLeft  = new ArrayHeap<>();
-            if (node.subHeapRight == null) node.subHeapRight = new ArrayHeap<>();
+            if (node.subHeapLeft == null) {
+                node.subHeapLeft = new ArrayHeap<>();
+            }
+            if (node.subHeapRight == null) {
+                node.subHeapRight = new ArrayHeap<>();
+            }
             maxHeightNodes.add(node);
         }
 
@@ -170,7 +175,7 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
     }
 
     private int fullTreeCapacity() {
-        return (1 << (maxHeight + 1)) - 1;
+        return (int)Math.pow(2, maxHeight+1) - 1;
     }
 
     private T replaceRootWithLast() {
@@ -384,7 +389,6 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
     }
 
     public void printHeapWithSubheaps() {
-        // 1) Drzewo w „tablicowej” kolejności:
         System.out.print("Tree: ");
         int treeCap = fullTreeCapacity();
         for (int i = 0; i < size && i < treeCap; i++) {
@@ -392,26 +396,25 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
         }
         System.out.println();
 
-        // 2) Zakres liści na poziomie maxHeight:
         int firstLeaf = (1 << maxHeight) - 1;
         int lastLeaf  = Math.min(size - 1, (1 << (maxHeight + 1)) - 2);
 
-        // 3) Dla każdego liścia wypisz jego subkopce:
         System.out.println("Subheaps at leaves:");
         for (int i = firstLeaf; i <= lastLeaf; i++) {
             TreeNode leaf = getNode(i);
+            boolean hasLeft  = leaf.subHeapLeft  != null && !leaf.subHeapLeft.isEmpty();
+            boolean hasRight = leaf.subHeapRight != null && !leaf.subHeapRight.isEmpty();
+
+            if (!hasLeft && !hasRight) continue;
+
             System.out.print("Leaf[" + i + "]=" + leaf.value);
 
-            // lewy podkopiec
-            if (leaf.subHeapLeft != null && !leaf.subHeapLeft.isEmpty()) {
+            if (hasLeft) {
                 System.out.print("  L-sub: " + heapToString(leaf.subHeapLeft));
             }
-
-            // prawy podkopiec
-            if (leaf.subHeapRight != null && !leaf.subHeapRight.isEmpty()) {
+            if (hasRight) {
                 System.out.print("  R-sub: " + heapToString(leaf.subHeapRight));
             }
-
             System.out.println();
         }
     }
@@ -424,4 +427,5 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
         }
         return elems.toString();
     }
+
 }
