@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterface<T> {
     private int maxHeight;
@@ -46,7 +43,7 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
         root.value = lastVal;
         size--;
 
-        // heapify w drzewie i w ewentualnych podkopcach
+        // heapify w drzewie i w ewentualnych podkopcach jak root ma subkopce
         heapifyDownTree();
         heapifyDownSubheaps(root);
 
@@ -60,6 +57,45 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
     }
 
     //METODY POMOCNICZE
+
+    public T getKthBiggestValue(int k){
+        if(k>size) throw new NoSuchElementException();
+        TreeArrayBinaryHeap<T> copy= copy();
+        T elem=root.value;
+
+        for (int i=0; i<k; i++){
+            elem=copy.maximum();
+        }
+        return elem;
+    }
+
+    public TreeArrayBinaryHeap<T> copy() {
+        TreeArrayBinaryHeap<T> clone = new TreeArrayBinaryHeap<>(this.maxHeight);
+
+        int maxIdx = (int)Math.pow(2,maxHeight-1) - 1;
+        int lastIdx = (int) Math.pow(2, maxHeight+1) - 2;
+
+        for (int i = 0; i < lastIdx; i++) {
+            TreeNode node = this.getNode(i);
+            if (node != null) clone.add(node.value);
+
+            if (i >= maxIdx) {
+                if (node.subHeapLeft != null) {
+                    for (T val : node.subHeapLeft.getHeap()) {
+                        clone.add(val);
+                    }
+                }
+                if (node.subHeapRight != null) {
+                    for (T val : node.subHeapRight.getHeap()) {
+                        clone.add(val);
+                    }
+                }
+            }
+        }
+
+        return clone;
+    }
+
 
     private void reorderAfterAdd(int leafIndex, boolean leftSide) {
         TreeNode node = getNode(leafIndex);
@@ -283,19 +319,18 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
             rightMax = R.peek();
         }
 
-
         // zamieniamy elementy
         if (leftMax != null && (rightMax == null || leftMax.compareTo(rightMax) >= 0)
                 && leftMax.compareTo(cur.value) > 0) {
             T old = cur.value;
-            T nv  = L.maximum();
-            cur.value = nv;
+            T newValue = L.maximum();
+            cur.value = newValue;
             L.add(old);
 
         } else if (rightMax != null && rightMax.compareTo(cur.value) > 0) {
             T old = cur.value;
-            T nv  = R.maximum();
-            cur.value = nv;
+            T newValue = R.maximum();
+            cur.value = newValue;
             R.add(old);
         }
     }
@@ -337,7 +372,8 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
 
     private void upheap(List<TreeNode> path) {
         for (int i = path.size() - 1; i > 0; i--) {
-            TreeNode child = path.get(i), parent = path.get(i - 1);
+            TreeNode child = path.get(i);
+            TreeNode parent = path.get(i - 1);
             if (parent.value.compareTo(child.value) < 0) {
                 swapValues(parent, child);
             } else {
