@@ -1,16 +1,24 @@
 import java.util.*;
 
-public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterface<T> {
+public class TreeArrayBinaryHeap<T> implements HeapInterface<T> {
     private int maxHeight;
     private TreeNode root;
     private int size;
+    private final Comparator<? super T> comparator;
 
-    public TreeArrayBinaryHeap(int maxHeight) {
+
+
+    public TreeArrayBinaryHeap(int maxHeight, Comparator<T> comparator) {
+        this.comparator = comparator;
         this.maxHeight = maxHeight;
+        if(maxHeight < 0){
+            throw new IllegalArgumentException("Max height musi byc dodatnia");
+        }
         size = 0;
     }
 
-    public TreeArrayBinaryHeap() {
+    public TreeArrayBinaryHeap(Comparator<? super T> comparator) {
+        this.comparator = comparator;
     }
 
     public class TreeNode {
@@ -36,14 +44,21 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
     @Override
     public T maximum() {
         if (size == 0) throw new NoSuchElementException();
-        T result = root.value;
+
+        if (size == 1) {
+            T elem = root.value;
+            root = null;
+            size = 0;
+            return elem;
+        }
 
         // zastąpujemy root ostatnim elementem (z drzewa lub podkopca)
+        T result = root.value;
         T lastVal = replaceRootWithLast();
         root.value = lastVal;
         size--;
 
-        // heapify w drzewie i w ewentualnych podkopcach jak root ma subkopce
+        // heapify w drzewie i w ewentualnych podkopcach, w przypadku jak root ma 2 subkopce
         heapifyDownTree();
         heapifyDownSubheaps(root);
 
@@ -56,46 +71,30 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
         size = 0;
     }
 
-    //METODY POMOCNICZE
+//modyfikacja
+    public void remove(T element){
+        if(size==0) throw new NoSuchElementException(" heap is empty");
 
-    public T getKthBiggestValue(int k){
-        if(k>size) throw new NoSuchElementException();
-        TreeArrayBinaryHeap<T> copy= copy();
-        T elem=root.value;
+        List<T> removedElements= new ArrayList<>();
+        boolean removed=false;
 
-        for (int i=0; i<k; i++){
-            elem=copy.maximum();
-        }
-        return elem;
-    }
-
-    public TreeArrayBinaryHeap<T> copy() {
-        TreeArrayBinaryHeap<T> clone = new TreeArrayBinaryHeap<>(this.maxHeight);
-
-        int maxIdx = (int)Math.pow(2,maxHeight-1) - 1;
-        int lastIdx = (int) Math.pow(2, maxHeight+1) - 2;
-
-        for (int i = 0; i < lastIdx; i++) {
-            TreeNode node = this.getNode(i);
-            if (node != null) clone.add(node.value);
-
-            if (i >= maxIdx) {
-                if (node.subHeapLeft != null) {
-                    for (T val : node.subHeapLeft.getHeap()) {
-                        clone.add(val);
-                    }
-                }
-                if (node.subHeapRight != null) {
-                    for (T val : node.subHeapRight.getHeap()) {
-                        clone.add(val);
-                    }
-                }
+        while(size>0){
+            T max=maximum();
+            if(!removed && max.equals(element)){
+                removed=true;
+            } else {
+                removedElements.add(max);
             }
         }
+        if(!removed){
+            throw new NoSuchElementException(" cannot find the element " + element);
+        }
 
-        return clone;
+        for (T elem: removedElements) {
+            add(elem);
+        }
     }
-
+//modyfiakcja
 
     private void reorderAfterAdd(int leafIndex, boolean leftSide) {
         TreeNode node = getNode(leafIndex);
@@ -103,7 +102,7 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
 
         // jezeli max z podkopca jest mniejszy od rodzica z drzewa to robimy reorder
         T subMax = heap.peek();
-        if (subMax.compareTo(node.value) <= 0) {
+        if (comparator.compare(subMax,node.value) <= 0) {
             return;
         }
         heap.maximum();
@@ -120,7 +119,7 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
         while (currentIdx > 0) {
             int parentIdx = getParentIndex(currentIdx);
             TreeNode parent = getNode(parentIdx);
-            if (parent.value.compareTo(current.value) < 0) {
+            if (comparator.compare(parent.value,current.value) < 0) {
                 swapValues(parent, current);
                 currentIdx = parentIdx;
                 current = parent;
@@ -129,6 +128,7 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
             }
         }
     }
+
 
     private void addToSubheaps(T item) {
         int h = maxHeight;
@@ -141,10 +141,10 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
         for (int i = firstIdx; i <= actualEnd; i++) {
             TreeNode node = getNode(i);
             if (node.subHeapLeft == null) {
-                node.subHeapLeft = new ArrayHeap<>();
+                node.subHeapLeft = new ArrayHeap<T>(comparator);
             }
             if (node.subHeapRight == null) {
-                node.subHeapRight = new ArrayHeap<>();
+                node.subHeapRight = new ArrayHeap<>(comparator);
             }
             maxHeightNodes.add(node);
         }
@@ -163,12 +163,12 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
             if (node.subHeapLeft.getHeight() == minHeight) {
                 node.subHeapLeft.add(item);
                 reorderAfterAdd(idx, true);
-                return;
+                break;
             }
             if (node.subHeapRight.getHeight() == minHeight) {
                 node.subHeapRight.add(item);
                 reorderAfterAdd(idx, false);
-                return;
+                break;
             }
         }
 
@@ -281,7 +281,7 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
         int lvl = 0;
         while (lvl < maxHeight && cur.left != null) {
             TreeNode bigger = pickBiggerChild(cur);
-            if (bigger.value.compareTo(cur.value) > 0) {
+            if (comparator.compare(bigger.value,cur.value) > 0) {
                 swapValues(cur, bigger);
                 cur = bigger;
                 lvl++;
@@ -296,7 +296,7 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
             return node.left;
         }
 
-        if (node.left.value.compareTo(node.right.value) >= 0) {
+        if (comparator.compare(node.left.value,node.right.value) >= 0) {
             return node.left;
         } else {
             return node.right;
@@ -320,14 +320,14 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
         }
 
         // zamieniamy elementy
-        if (leftMax != null && (rightMax == null || leftMax.compareTo(rightMax) >= 0)
-                && leftMax.compareTo(cur.value) > 0) {
+        if (leftMax != null && (rightMax == null || comparator.compare(leftMax,(rightMax)) >= 0)
+                && comparator.compare(leftMax,cur.value) > 0) {
             T old = cur.value;
             T newValue = L.maximum();
             cur.value = newValue;
             L.add(old);
 
-        } else if (rightMax != null && rightMax.compareTo(cur.value) > 0) {
+        } else if (rightMax != null &&comparator.compare( rightMax,(cur.value)) > 0) {
             T old = cur.value;
             T newValue = R.maximum();
             cur.value = newValue;
@@ -360,21 +360,21 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
         }
 
         //dodajemy element na koniec w odpowiednie moejsce
-        if (path.get(path.size() - 1) == 0) {
+        if (path.getLast() == 0) {
             cur.left = newNode;
         } else {
             cur.right = newNode;
         }
         nodes.add(newNode);
         //heapify up
-        upheap(nodes);
+        heapifyUp(nodes);
     }
 
-    private void upheap(List<TreeNode> path) {
+    private void heapifyUp(List<TreeNode> path) {
         for (int i = path.size() - 1; i > 0; i--) {
             TreeNode child = path.get(i);
             TreeNode parent = path.get(i - 1);
-            if (parent.value.compareTo(child.value) < 0) {
+            if (comparator.compare(parent.value,(child.value)) < 0) {
                 swapValues(parent, child);
             } else {
                 break;
@@ -386,42 +386,16 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
         return maxHeight;
     }
 
-    public int getParentIndex(int index) {
+    protected int getParentIndex(int index) {
         return (index - 1) / 2;
     }
 
-    public int getLeftChildIndex(int index) {
+    protected int getLeftChildIndex(int index) {
         return (index * 2) + 1;
     }
 
-    public int getRightChildIndex(int index) {
+    protected int getRightChildIndex(int index) {
         return (index * 2) + 2;
-    }
-
-    //debug
-    public void getLeft(int i) {
-        for (int x = 0; x < i; x++) {
-            System.out.println(root.left.value);
-        }
-    }
-
-    public void getRight(int i) {
-        System.out.println(root.right.value);
-    }
-
-    public void getRoot() {
-        System.out.println(root.value);
-    }
-
-    public T getAtIdx(int i) {
-
-            System.out.println(getNode(i).value);
-        return getNode(i).value;
-    }
-    public ArrayHeap<T> getSubHeapLeft() {
-
-        int firstOfLasts=(int) Math.pow(2,maxHeight)-1;
-        return getNode(firstOfLasts).subHeapRight;
     }
 
     public void printHeapWithSubheaps() {
@@ -456,12 +430,14 @@ public class TreeArrayBinaryHeap<T extends Comparable<T>> implements HeapInterfa
     }
 
     private String heapToString(ArrayHeap<T> heap) {
-        ArrayHeap<T> copy = new ArrayHeap<>(heap);
+        ArrayHeap<T> copy = new ArrayHeap<>(heap,comparator);
         List<T> elems = new ArrayList<>();
         while (!copy.isEmpty()) {
             elems.add(copy.maximum());
         }
         return elems.toString();
     }
-
+    public Comparator<? super T> getComparator() {
+        return comparator;
+    }
 }

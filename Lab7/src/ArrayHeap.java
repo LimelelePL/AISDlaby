@@ -1,18 +1,23 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.NoSuchElementException;
 
-public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T>  implements HeapInterface<T>{
+public class ArrayHeap <T> extends TreeArrayBinaryHeap<T>  implements HeapInterface<T>{
     private final ArrayList<T> heap;
-    private boolean isPossibleToAdd;
+    private final Comparator<? super T> comparator;
 
-    public ArrayHeap () {
+    public ArrayHeap (Comparator<? super T> comparator1) {
+        super(comparator1);
+        this.comparator = comparator1;
         heap = new ArrayList<>();
-        isPossibleToAdd = false;
     }
 
-    public ArrayHeap(ArrayHeap<T> other) {
+    public ArrayHeap(ArrayHeap<T> other,Comparator<? super T> comparator) {
+        super(comparator);
         this.heap = new ArrayList<>(other.heap);
+        this.comparator = comparator;
     }
+
 
     @Override
     public String toString() {
@@ -54,7 +59,7 @@ public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T> 
         while (index > 0) {
             int parentIndex = getParentIndex(index);
 
-            if (heap.get(parentIndex).compareTo(heap.get(index)) < 0) {
+            if( getComparator().compare(heap.get(parentIndex),heap.get(index))< 0) {
                 T tmp = heap.get(index);
                 heap.set(index, heap.get(parentIndex));
                 heap.set(parentIndex, tmp);
@@ -86,12 +91,12 @@ public class ArrayHeap <T extends Comparable<T>> extends TreeArrayBinaryHeap<T> 
             int rightChildIndex = getRightChildIndex(index);
 
             if(leftChildIndex< heap.size() &&
-                    heap.get(leftChildIndex).compareTo(heap.get(largest)) > 0){
+                  getComparator().compare( heap.get(leftChildIndex),(heap.get(largest))) > 0){
 
                 largest = leftChildIndex;
             }
             if(rightChildIndex< heap.size() &&
-                    heap.get(rightChildIndex).compareTo(heap.get(largest)) > 0){
+                    getComparator().compare(heap.get(rightChildIndex) , heap.get(largest)) > 0){
 
                 largest = rightChildIndex;
             }
