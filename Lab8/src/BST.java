@@ -5,6 +5,7 @@ public class BST<T> {
     private Node<T> root;
     private Comparator<T> comparator;
 
+
     public BST(Comparator<T> comparator) {
         root = null;
         this.comparator = comparator;
@@ -13,15 +14,22 @@ public class BST<T> {
     public boolean rContains(T value){
         return rContains(root, value);
     }
+
     private boolean rContains(Node<T> node, T value) {
         if (node == null) return false;
+
         int cmp = comparator.compare(value, node.getValue());
-        if (cmp == 0) return true;
-        else if (cmp < 0) return rContains(node.getLeft(), value);
-        else return rContains(node.getRight(), value);
+        if (cmp == 0) {
+            return true;
+        } else if (cmp < 0) {
+            return rContains(node.getLeft(), value);
+        } else {
+            return rContains(node.getRight(), value);
+        }
     }
 
     public boolean insert(T value){
+        if(value==null) throw new IllegalArgumentException("nie mozna wstawic nulla");
         Node<T> newNode=new Node<>(value);
         if(root==null){
             root = newNode;
@@ -70,7 +78,7 @@ public class BST<T> {
         if (temp != null && temp.getRight() != null) {
             Node<T> temp1 = temp.getRight();
             while (temp1.getLeft() != null) {
-                temp1 = temp.getLeft();
+                temp1 = temp1.getLeft();
             }
             successor = temp1;
         }
@@ -145,22 +153,51 @@ public class BST<T> {
     }
 
     private T findMin(Node<T> node) {
-        if (node.getLeft() == null) {
-            return node.getValue();
-        }
-        return findMin(node.getLeft());
+       if(node==null) return null;
+
+       if(node.getLeft()!=null){
+           return findMin(node.getLeft());
+       }
+
+       return node.getValue();
     }
 
     public T findMax() {
-        if (root == null) throw new NoSuchElementException();
+        if (root == null) {
+            throw new NoSuchElementException();
+        }
         return findMax(root);
     }
 
     private T findMax(Node<T> node) {
-        if (node.getRight() == null) {
+        if (node == null) return null;
+
+        if(node.getRight()!=null){
+            return findMax(node.getRight());
+        }
+        return node.getValue();
+    }
+
+    public T kthBiggest(int k){
+        return kthBiggest(k,root, new Counter());
+    }
+
+    private T kthBiggest(int k, Node<T> node, Counter counter){
+        if(node==null) return null;
+
+        T right=kthBiggest(k,node.getRight(), counter);
+        if(right!=null) {
+            return right;
+        }
+        counter.count++;
+        if(counter.count==k){
             return node.getValue();
         }
-        return findMax(node.getRight());
+        return kthBiggest(k,node.getLeft(), counter);
+    }
+
+    private static class Counter{
+        int count=0;
     }
 
     public <R> void preOrderWalk(IExecutor<T, R> exec) {

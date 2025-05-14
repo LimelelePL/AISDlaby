@@ -69,122 +69,33 @@ public class TreeArrayBinaryHeap<T> implements HeapInterface<T> {
         size = 0;
     }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    //modyfikacja
     public void remove(T element){
-        int idx = indexOf(element);
-        if (idx < 0) {
-            throw new NoSuchElementException("Nie znaleziono: " + element);
-        }
-        int treeCap = fullTreeCapacity();
-        if (idx < treeCap) {
-            removeAtTreeIndex(idx);
-        } else{
+        if(size==0) throw new NoSuchElementException(" heap is empty");
 
-        }
-    }
+        List<T> removedElements= new ArrayList<>();
+        boolean removed=false;
 
-    private void removeAtTreeIndex(int idx) {
-        int lastIdx = size - 1;
-
-        TreeNode lastNode = getNode(lastIdx);
-        T lastVal = lastNode.value;
-
-        removeLastTreeNode();
-        size--;
-        if (idx != lastIdx) {
-            TreeNode target = getNode(idx);
-            T old = target.value;
-            target.value = lastVal;
-
-            if (comparator.compare(lastVal,old) > 0) {
-                heapifyUpFrom(idx);
+        while(size>0){
+            T max=maximum();
+            if(!removed && max.equals(element)){
+                removed=true;
             } else {
-                heapifyDownFrom(idx);
+                removedElements.add(max);
             }
+        }
+        if(!removed){
+            throw new NoSuchElementException(" cannot find the element " + element);
+        }
+
+        for (T elem: removedElements) {
+            add(elem);
         }
     }
-
-    private void heapifyDownFrom(int idx) {
-        TreeNode cur = getNode(idx);
-        int lvl = calculateTrack(idx).size() - 1;
-        while (lvl < maxHeight && cur.left != null) {
-            TreeNode bigger = pickBiggerChild(cur);
-            if (comparator.compare(bigger.value,cur.value) > 0) {
-                swapValues(cur, bigger);
-                cur = bigger;
-                lvl++;
-            } else {
-                return;
-            }
-        }
-    }
-    private void heapifyUpFrom(int idx) {
-        while (idx > 0) {
-            int p = getParentIndex(idx);
-            TreeNode parent = getNode(p);
-            TreeNode node   = getNode(idx);
-            if (comparator.compare(parent.value,(node.value)) < 0) {
-                swapValues(parent, node);
-                idx = p;
-            } else {
-                break;
-            }
-        }
-    }
-
-
-    public int indexOf(T element) {
-        if (root == null) return -1;
-
-        int n = size;
-        int lastTreeIx = Math.min(n - 1, fullTreeCapacity() - 1);
-
-        Stack<TreeNode> nodes  = new Stack<>();
-        Stack<Integer>  idxs   = new Stack<>();
-        nodes.push(root);
-        idxs.push(0);
-
-        while (!nodes.isEmpty()) {
-            TreeNode node = nodes.pop();
-            int idx = idxs.pop();
-
-            if (idx <= lastTreeIx && element.equals(node.value)) {
-                return idx;
-            }
-
-            if (node.right != null) {
-                nodes.push(node.right);
-                idxs.push(getRightChildIndex(idx));
-            }
-            if (node.left != null) {
-                nodes.push(node.left);
-                idxs.push(getLeftChildIndex(idx));
-            }
-        }
-
-        int firstLeaf = (1 << maxHeight) - 1;
-        int lastLeaf  = Math.min(n - 1, (1 << (maxHeight + 1)) - 2);
-
-        int globalIdx = fullTreeCapacity();
-        for (int leafIx = firstLeaf; leafIx <= lastLeaf; leafIx++) {
-            TreeNode leaf = getNode(leafIx);
-
-            if (leaf.subHeapLeft != null) {
-                for (T v : leaf.subHeapLeft.getHeap()) {
-                    if (element.equals(v)) return globalIdx;
-                    globalIdx++;
-                }
-            }
-            if (leaf.subHeapRight != null) {
-                for (T v : leaf.subHeapRight.getHeap()) {
-                    if (element.equals(v)) return globalIdx;
-                    globalIdx++;
-                }
-            }
-        }
-
-        return -1;
-    }
-
+//modyfiakcja
 
     private void reorderAfterAdd(int leafIndex, boolean leftSide) {
         TreeNode node = getNode(leafIndex);
@@ -222,8 +133,8 @@ public class TreeArrayBinaryHeap<T> implements HeapInterface<T> {
 
     private void addToSubheaps(T item) {
         int h = maxHeight;
-        int firstIdx = (int)Math.pow(2, h) - 1;       // indeks pierwszego węzła na poziomie H
-        int lastIdx = (int) Math.pow(2, h+1) - 2; // indeks ostatniego węzła na poziomie H
+        int firstIdx = (int)Math.pow(2, h) - 1;       // indeks pierwszego węzła na poziomie Hmax
+        int lastIdx = (int) Math.pow(2, h+1) - 2; // indeks ostatniego węzła na poziomie Hmax
         int actualEnd = Math.min(lastIdx, size - 1);
 
         //zbieram do listy wezly które są na poziomie maxHeight i robie dla nich podkopce
