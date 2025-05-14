@@ -400,7 +400,7 @@ public class TreeArrayBinaryHeap<T> implements HeapInterface<T> {
     }
 
     public void printHeapWithSubheaps() {
-        // 1) Drzewiasta część:
+        //  Drzewiasta część:
         System.out.print("Tree: ");
         int treeCap = fullTreeCapacity();
         for (int i = 0; i < size && i < treeCap; i++) {
@@ -413,11 +413,11 @@ public class TreeArrayBinaryHeap<T> implements HeapInterface<T> {
             return;
         }
 
-        // 2) Zakres liści w drzewiastej części (już mamy przynajmniej jeden pełny poziom):
+        //  Zakres liści w drzewiastej części (już mamy przynajmniej jeden pełny poziom):
         int firstLeaf = (1 << maxHeight) - 1;
         int lastLeaf  = Math.min(size - 1, treeCap - 1);
 
-        // 3) Dla każdego liścia wypisz tylko te subkopce, które istnieją:
+        //  Dla każdego liścia wypisz tylko te subkopce, które istnieją:
         System.out.println("Subheaps at leaves:");
         for (int i = firstLeaf; i <= lastLeaf; i++) {
             TreeNode leaf = getNode(i);
