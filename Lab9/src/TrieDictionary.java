@@ -1,8 +1,15 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class TrieDictionary <V> implements TrieOperations<V> {
     private TrieNode<V> root;
+    private final Comparator<Character> comparator;
+
+    public TrieDictionary(Comparator<Character> comparator) {
+        this.root = new TrieNode<>('\0');
+        this.comparator = comparator;
+    }
 
     private static class TrieNode<V>{
         private V value;
@@ -18,8 +25,33 @@ public class TrieDictionary <V> implements TrieOperations<V> {
         }
     }
 
-    public TrieDictionary(){
-        root = new TrieNode<>('\0');
+    public List<String> suggest(String prefix){
+
+        TrieNode<V> node=root;
+        if (node==null) return new ArrayList<>();
+
+        for (int i=0; i<prefix.length(); i++){
+            char ch=prefix.charAt(i);
+            node=findChildNode(node,ch);
+        }
+
+        return suggest(node, new StringBuilder(prefix));
+    }
+
+    private List<String> suggest(TrieNode<V> node, StringBuilder prefix){
+        List<String> results=new ArrayList<>();
+        if(node==null) return results;
+        if(node.value!=null){
+            results.add(prefix.toString());
+        }
+        TrieNode<V> child=node.firstChild;
+        while (child!=null){
+            prefix.append(child.key);
+            results.addAll(suggest(child, prefix));
+            prefix.setLength(prefix.length()-1);
+            child=child.nextSibling;
+        }
+        return results;
     }
 
 
@@ -56,7 +88,7 @@ public class TrieDictionary <V> implements TrieOperations<V> {
         TrieNode<V> current = parentNode.firstChild;
 
         // miejsce do wstawienia węzła w porządku leksykograficznym
-        while (current != null && current.key < ch) {
+        while (current != null && comparator.compare(current.key,ch)<0) {
             prev = current;
             current = current.nextSibling;
         }
@@ -127,13 +159,13 @@ public class TrieDictionary <V> implements TrieOperations<V> {
         V valueToRemove = currentNode.value;
         currentNode.value = null; // "nie-klucz"
 
-        // Węzeł jest zbędny, jeśli .value == null oraz .firstChild == null
-        for (int i = path.size() - 1; i > 0; i--) { // i > 0, bo path.get(0) to korzeń pomocniczy
+        // Węzeł jest zbędny tzn .value == null oraz .firstChild == null
+        for (int i = path.size() - 1; i > 0; i--) {
             TrieNode<V> nodeToPotentiallyRemove = path.get(i);
             TrieNode<V> parentOfNode = path.get(i - 1);
 
             if (nodeToPotentiallyRemove.value == null && nodeToPotentiallyRemove.firstChild == null) {
-                // Usuń nodeToPotentiallyRemove z listy dzieci parentOfNode
+                // Usuwamy nodeToPotentiallyRemove z listy dzieci parentOfNode
                 removeChildNode(parentOfNode, nodeToPotentiallyRemove.key);
             } else {
                 break;
@@ -144,7 +176,7 @@ public class TrieDictionary <V> implements TrieOperations<V> {
     private TrieNode<V> findChildNode(TrieNode<V> parentNode, char ch) {
         TrieNode<V> currentChild = parentNode.firstChild;
         while (currentChild != null) {
-            if (currentChild.key == ch) {
+            if (comparator.compare(currentChild.key,ch)==0) {
                 return currentChild;
             }
             currentChild = currentChild.nextSibling;
@@ -157,7 +189,7 @@ public class TrieDictionary <V> implements TrieOperations<V> {
         TrieNode<V> prevChild = null;
 
         while (currentChild != null) {
-            if (currentChild.key == ch) {
+            if (comparator.compare(currentChild.key,ch)==0) {
                 // Znaleziono dziecko do usunięcia
                 if (prevChild == null) { // Jest to pierwsze dziecko na liście rodzeństwa
                     parentNode.firstChild = currentChild.nextSibling;
@@ -171,14 +203,12 @@ public class TrieDictionary <V> implements TrieOperations<V> {
         }
     }
 
-
-
     public void printAllKeysDfs() {
         System.out.println("Klucze w słowniku (DFS):");
-        dfsPrintRecursive(root.firstChild, new StringBuilder());
+        dfsPrint(root.firstChild, new StringBuilder());
     }
 
-    private void dfsPrintRecursive(TrieNode<V> currentNode, StringBuilder currentPath) {
+    private void dfsPrint(TrieNode<V> currentNode, StringBuilder currentPath) {
         if (currentNode == null) {
             return;
         }
@@ -186,8 +216,8 @@ public class TrieDictionary <V> implements TrieOperations<V> {
         if (currentNode.value != null) {
             System.out.println(currentPath.toString() + ": " + currentNode.value);
         }
-        dfsPrintRecursive(currentNode.firstChild, currentPath);
+        dfsPrint(currentNode.firstChild, currentPath);
         currentPath.setLength(currentPath.length() - 1);
-        dfsPrintRecursive(currentNode.nextSibling, currentPath);
+        dfsPrint(currentNode.nextSibling, currentPath);
     }
 }
